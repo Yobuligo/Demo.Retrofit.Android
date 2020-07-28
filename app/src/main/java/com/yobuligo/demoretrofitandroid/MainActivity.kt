@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.w3c.dom.Text
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findAllPersons() = runBlocking {
-        val personDAO = createRestCall(IPersonDAO::class.java)
+        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
         val callPerson: Call<List<Person>> = personDAO.findAll()
         callPerson.enqueue(object : Callback<List<Person>> {
             override fun onFailure(call: Call<List<Person>>, t: Throwable) {
@@ -61,7 +62,8 @@ class MainActivity : AppCompatActivity() {
                     var text: String = ""
 
                     for (person in persons) {
-                        text = text + "\n " + person.firstname + person.lastname
+                        text =
+                            text + "\n " + person.id + " " + person.firstname + " " + person.lastname
                     }
 
                     textView.text = text
@@ -72,8 +74,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findById() = runBlocking {
-        val personDAO = createRestCall(IPersonDAO::class.java)
-        val callPerson: Call<Person> = personDAO.findById(1)
+        val id: Long = findViewById<TextView>(R.id.txt_id).text.toString().toLong()
+        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
+        val callPerson: Call<Person> = personDAO.findById(id)
         callPerson.enqueue(object : Callback<Person> {
             override fun onFailure(call: Call<Person>, t: Throwable) {
                 textView.text = t.message
@@ -89,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                     val person: Person = response.body()!!
 
                     textView.text =
-                        "Person with id $person.id is ${person.firstname} ${person.lastname}"
+                        "Person with id ${person.id} is ${person.firstname} ${person.lastname}"
                 }
             }
         }
@@ -98,10 +101,10 @@ class MainActivity : AppCompatActivity() {
 
     suspend fun addPerson() = runBlocking {
         var person = Person()
-        person.firstname = "New User Firstname"
-        person.lastname = "New User Lastname"
+        person.firstname = findViewById<TextView>(R.id.txt_firstname).text.toString()
+        person.lastname = findViewById<TextView>(R.id.txt_lastname).text.toString()
 
-        val personDAO = createRestCall(IPersonDAO::class.java)
+        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
         val call: Call<Person> = personDAO.addPerson(person)
         call.enqueue(object : Callback<Person> {
             override fun onFailure(call: Call<Person>, t: Throwable) {
@@ -116,17 +119,10 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.body() != null) {
                     val person: Person = response.body()!!
-                    textView.text = "Person ${person.firstname} ${person.lastname} was added"
+                    textView.text =
+                        "Person ${person.id} ${person.firstname} ${person.lastname} was added"
                 }
             }
         })
-    }
-
-    private fun <T> createRestCall(requestAPI: Class<T>): T {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(Config.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        return retrofit.create(requestAPI)
     }
 }
