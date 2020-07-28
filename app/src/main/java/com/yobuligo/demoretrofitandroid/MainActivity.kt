@@ -38,12 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findAllPersons() = runBlocking {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(Config.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
+        val personDAO = createRestCall(IPersonDAO::class.java)
         val callPerson: Call<List<Person>> = personDAO.findAll()
         callPerson.enqueue(object : Callback<List<Person>> {
             override fun onFailure(call: Call<List<Person>>, t: Throwable) {
