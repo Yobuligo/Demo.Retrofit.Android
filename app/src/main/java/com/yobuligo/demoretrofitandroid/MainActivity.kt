@@ -31,28 +31,28 @@ class MainActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val mindsetAPI: IMindSetAPI = retrofit.create(IMindSetAPI::class.java)
-        val call: Call<List<MindSet>> = mindsetAPI.getMindsets()
-        call.enqueue(object : Callback<List<MindSet>> {
-            override fun onFailure(call: Call<List<MindSet>>, t: Throwable) {
-                textView.setText(t.message)
+        val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
+        val callPerson: Call<List<Person>> = personDAO.getPersons()
+        callPerson.enqueue(object : Callback<List<Person>> {
+            override fun onFailure(call: Call<List<Person>>, t: Throwable) {
+                textView.text = t.message
             }
 
-            override fun onResponse(call: Call<List<MindSet>>, response: Response<List<MindSet>>) {
+            override fun onResponse(call: Call<List<Person>>, response: Response<List<Person>>) {
                 if (!response.isSuccessful) {
-                    textView.setText("code " + response.code())
+                    textView.text = "code " + response.code()
                     return
                 }
 
                 if (response.body() != null) {
-                    val mindsets: List<MindSet> = response.body()!!
+                    val persons: List<Person> = response.body()!!
                     var text: String = ""
 
-                    for (mindset in mindsets) {
-                        text = text + "\n" + mindset.description
+                    for (person in persons) {
+                        text = text + "\n " + person.firstname + person.lastname
                     }
 
-                    textView.setText(text)
+                    textView.text = text
                 }
             }
         }
