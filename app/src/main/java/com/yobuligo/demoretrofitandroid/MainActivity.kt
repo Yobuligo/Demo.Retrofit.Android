@@ -2,6 +2,8 @@ package com.yobuligo.demoretrofitandroid
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -12,14 +14,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.reflect.KClass
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var textView: TextView
-
-    companion object {
-        const val BASE_URL: String = "http://10.0.2.2:8080/api/"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +26,15 @@ class MainActivity : AppCompatActivity() {
 
         textView = findViewById(R.id.textview)
 
-        GlobalScope.launch(Dispatchers.Main) { findAllPersons() }
+        val btnFindAll: Button = findViewById(R.id.btn_persons_find_all)
+        btnFindAll.setOnClickListener(View.OnClickListener {
+            GlobalScope.launch(Dispatchers.Main) { findAllPersons() }
+        })
+
+        val btnFindById: Button = findViewById(R.id.btn_persons_find_by_id)
+        btnFindById.setOnClickListener(View.OnClickListener {
+            GlobalScope.launch(Dispatchers.Main) { findById() }
+        })
     }
 
     suspend fun findAllPersons() = runBlocking {
@@ -69,7 +76,6 @@ class MainActivity : AppCompatActivity() {
             .baseUrl(Config.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
         val callPerson: Call<Person> = personDAO.findById(1)
         callPerson.enqueue(object : Callback<Person> {
@@ -92,5 +98,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         )
+    }
+
+    private fun <T> createRestCall(requestAPI: Class<T>): T {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(Config.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retrofit.create(requestAPI)
     }
 }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Demo.Retrofit.Android</string>
+    <string name="persons_find_all">Find All</string>
+    <string name="persons_find_by_id">Find by Id</string>
 </resources>
