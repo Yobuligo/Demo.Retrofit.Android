@@ -14,7 +14,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var textView: TextView
+
+    companion object {
+        const val BASE_URL: String = "http://10.0.2.2:8080/api/"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,17 +27,17 @@ class MainActivity : AppCompatActivity() {
 
         textView = findViewById(R.id.textview)
 
-        GlobalScope.launch(Dispatchers.Main) { doWebserviceCall() }
+        GlobalScope.launch(Dispatchers.Main) { findAllPersons() }
     }
 
-    suspend fun doWebserviceCall() = runBlocking {
+    suspend fun findAllPersons() = runBlocking {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/api/")
+            .baseUrl(Config.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
-        val callPerson: Call<List<Person>> = personDAO.getPersons()
+        val callPerson: Call<List<Person>> = personDAO.findAll()
         callPerson.enqueue(object : Callback<List<Person>> {
             override fun onFailure(call: Call<List<Person>>, t: Throwable) {
                 textView.text = t.message
@@ -53,6 +58,36 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     textView.text = text
+                }
+            }
+        }
+        )
+    }
+
+    suspend fun findById() = runBlocking {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(Config.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
+        val callPerson: Call<Person> = personDAO.findById(1)
+        callPerson.enqueue(object : Callback<Person> {
+            override fun onFailure(call: Call<Person>, t: Throwable) {
+                textView.text = t.message
+            }
+
+            override fun onResponse(call: Call<Person>, response: Response<Person>) {
+                if (!response.isSuccessful) {
+                    textView.text = "code " + response.code()
+                    return
+                }
+
+                if (response.body() != null) {
+                    val person: Person = response.body()!!
+
+                    textView.text =
+                        "Person with id $person.id is ${person.firstname} ${person.lastname}"
                 }
             }
         }
