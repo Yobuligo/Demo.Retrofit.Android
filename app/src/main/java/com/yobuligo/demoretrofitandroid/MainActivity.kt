@@ -9,13 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.w3c.dom.Text
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.reflect.KClass
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,8 +40,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findAllPersons() = runBlocking {
-        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
-        val callPerson: Call<List<Person>> = personDAO.findAll()
+        val personService = ServiceBuilder().build(IPersonService::class.java)
+        val callPerson: Call<List<Person>> = personService.findAll()
         callPerson.enqueue(object : Callback<List<Person>> {
             override fun onFailure(call: Call<List<Person>>, t: Throwable) {
                 textView.text = t.message
@@ -75,8 +71,8 @@ class MainActivity : AppCompatActivity() {
 
     suspend fun findById() = runBlocking {
         val id: Long = findViewById<TextView>(R.id.txt_id).text.toString().toLong()
-        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
-        val callPerson: Call<Person> = personDAO.findById(id)
+        val personService = ServiceBuilder().build(IPersonService::class.java)
+        val callPerson: Call<Person> = personService.findById(id)
         callPerson.enqueue(object : Callback<Person> {
             override fun onFailure(call: Call<Person>, t: Throwable) {
                 textView.text = t.message
@@ -104,8 +100,8 @@ class MainActivity : AppCompatActivity() {
         person.firstname = findViewById<TextView>(R.id.txt_firstname).text.toString()
         person.lastname = findViewById<TextView>(R.id.txt_lastname).text.toString()
 
-        val personDAO = RestCallRequest().create(IPersonDAO::class.java)
-        val call: Call<Person> = personDAO.addPerson(person)
+        val personService = ServiceBuilder().build(IPersonService::class.java)
+        val call: Call<Person> = personService.addPerson(person)
         call.enqueue(object : Callback<Person> {
             override fun onFailure(call: Call<Person>, t: Throwable) {
                 textView.text = t.message

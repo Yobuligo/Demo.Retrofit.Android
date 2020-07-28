@@ -6,7 +6,10 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-interface IPersonDAO {
+/**
+ * PersonEndpoint oder besser PersonService?
+ */
+interface IPersonService {
     @GET("persons")
     fun findAll(): Call<List<Person>>
 
