@@ -35,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         btnFindById.setOnClickListener(View.OnClickListener {
             GlobalScope.launch(Dispatchers.Main) { findById() }
         })
+
+        val btnAdd: Button = findViewById(R.id.btn_persons_add)
+        btnAdd.setOnClickListener(View.OnClickListener {
+            GlobalScope.launch(Dispatchers.Main) { addPerson() }
+        })
     }
 
     suspend fun findAllPersons() = runBlocking {
@@ -67,11 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findById() = runBlocking {
-        val retrofit = Retrofit.Builder()
-            .baseUrl(Config.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        val personDAO: IPersonDAO = retrofit.create(IPersonDAO::class.java)
+        val personDAO = createRestCall(IPersonDAO::class.java)
         val callPerson: Call<Person> = personDAO.findById(1)
         callPerson.enqueue(object : Callback<Person> {
             override fun onFailure(call: Call<Person>, t: Throwable) {
@@ -93,6 +94,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
         )
+    }
+
+    suspend fun addPerson() = runBlocking {
+        var person = Person()
+        person.firstname = "New User Firstname"
+        person.lastname = "New User Lastname"
+
+        val personDAO = createRestCall(IPersonDAO::class.java)
+        val call: Call<Person> = personDAO.addPerson(person)
+        call.enqueue(object : Callback<Person> {
+            override fun onFailure(call: Call<Person>, t: Throwable) {
+                textView.text = t.message
+            }
+
+            override fun onResponse(call: Call<Person>, response: Response<Person>) {
+                if (!response.isSuccessful) {
+                    textView.text = "code " + response.code()
+                    return
+                }
+
+                if (response.body() != null) {
+                    val person: Person = response.body()!!
+                    textView.text = "Person ${person.firstname} ${person.lastname} was added"
+                }
+            }
+        })
     }
 
     private fun <T> createRestCall(requestAPI: Class<T>): T {
