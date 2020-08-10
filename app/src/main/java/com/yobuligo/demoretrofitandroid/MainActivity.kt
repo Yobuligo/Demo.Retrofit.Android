@@ -7,18 +7,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.yobuligo.demoretrofitandroid.model.InternalCall
 import com.yobuligo.demoretrofitandroid.model.person.PersonDTO
 import com.yobuligo.demoretrofitandroid.model.team.TeamDTO
 import com.yobuligo.demoretrofitandroid.model.person.IPersonDTOService
 import com.yobuligo.demoretrofitandroid.model.team.ITeamDTOService
-import com.yobuligo.demoretrofitandroid.services.IServiceExecutorBuilder
 import com.yobuligo.demoretrofitandroid.services.ServiceBuilder
 import com.yobuligo.demoretrofitandroid.services.ServiceExecutorBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -113,11 +108,12 @@ class MainActivity : AppCompatActivity() {
         val id: Long = findViewById<TextView>(R.id.txt_id).text.toString().toLong()
         val personService = ServiceBuilder()
             .build(IPersonDTOService::class.java)
-        val callPersonDTO: Call<PersonDTO> = personService.findById(id, "firstname,lastname")
+        val callPersonDTO: Call<PersonDTO> = personService.findById(id)
 
+        ServiceExecutorBuilder<PersonDTO>()
+            .execute(personService.findById(id))
 
-
-        callPersonDTO.enqueue(object : Callback<PersonDTO> {
+/*        callPersonDTO.enqueue(object : Callback<PersonDTO> {
             override fun onFailure(call: Call<PersonDTO>, t: Throwable) {
                 textView.text = t.message
             }
@@ -136,7 +132,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        )
+        )*/
+
+        Log.i("Test", "findById: Done")
     }
 
     suspend fun addPerson() = runBlocking {
