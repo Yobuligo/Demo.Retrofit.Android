@@ -17,6 +17,13 @@ interface IPersonDTOService {
         @Query("limit") limit: String
     ): Call<PageRequestDTO<PersonDTO>>
 
+    @GET("persons")
+    fun findAll(
+        @Query("offset") offset: String,
+        @Query("limit") limit: String,
+        @Query("sort") sort: String
+    ): Call<PageRequestDTO<PersonDTO>>
+
     @GET("persons/{id}")
     fun findById(@Path("id") id: Long): Call<PersonDTO>
 

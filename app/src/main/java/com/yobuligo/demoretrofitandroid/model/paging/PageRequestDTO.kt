@@ -1,5 +1,7 @@
 package com.yobuligo.demoretrofitandroid.model.paging
 
+import retrofit2.http.QueryMap
+
 class PageRequestDTO<T> {
     var totalPages: Int = 0
     var totalElements: Int = 0
