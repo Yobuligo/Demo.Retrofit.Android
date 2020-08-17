@@ -61,13 +61,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findAllPersons() = runBlocking {
-        val pageRequestDTO = ServiceExecutor().execute(
+        val personDTOs = ServiceExecutor().execute(
             ServiceFactory().createService(IPersonDTOService::class.java)
-                .findAll("1", "3", "firstname")
+                .findAll()
         )
 
         var text = ""
-        for (personDTO in pageRequestDTO.content) {
+        for (personDTO in personDTOs) {
             text =
                 text + "\n " + personDTO.id + " " + personDTO.firstname + " " + personDTO.lastname
         }
