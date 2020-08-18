@@ -13,6 +13,7 @@ import com.yobuligo.demoretrofitandroid.model.person.IPersonDTOService
 import com.yobuligo.demoretrofitandroid.model.team.ITeamDTOService
 import com.yobuligo.demoretrofitandroid.services.ServiceExecutor
 import com.yobuligo.demoretrofitandroid.services.ServiceFactory
+import com.yobuligo.demoretrofitandroid.services.WebServiceCallException
 import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -61,18 +62,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     suspend fun findAllPersons() = runBlocking {
-        val personDTOs = ServiceExecutor().execute(
-            ServiceFactory().createService(IPersonDTOService::class.java)
-                .findAll()
-        )
+        try {
+            val personDTOs = ServiceExecutor().execute(
+                ServiceFactory().createService(IPersonDTOService::class.java)
+                    .findAll()
+            )
 
-        var text = ""
-        for (personDTO in personDTOs) {
-            text =
-                text + "\n " + personDTO.id + " " + personDTO.firstname + " " + personDTO.lastname
+            var text = ""
+            for (personDTO in personDTOs) {
+                text =
+                    text + "\n " + personDTO.id + " " + personDTO.firstname + " " + personDTO.lastname
+            }
+
+            textView.text = text
+        } catch (e: WebServiceCallException) {
+            textView.text = e.message
+            return@runBlocking
         }
-
-        textView.text = text
     }
 
     suspend fun findById() = runBlocking {
