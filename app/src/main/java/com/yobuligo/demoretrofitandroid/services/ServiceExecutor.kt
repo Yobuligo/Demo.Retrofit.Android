@@ -11,6 +11,8 @@ class ServiceExecutor : IServiceExecutor {
     override suspend fun <T : Any> execute(call: Call<T>): T {
         lateinit var result: T
 
+        //Although the "execute" method is already called synchronously
+        //It must be executed on the IO-Thread
         GlobalScope.async(Dispatchers.IO) {
             val response = call.execute()
             if (!response.isSuccessful()) {

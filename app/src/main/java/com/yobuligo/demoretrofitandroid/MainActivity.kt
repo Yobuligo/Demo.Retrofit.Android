@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     suspend fun findAllPersons() = runBlocking {
         try {
-            val personDTOs = ServiceExecutor().execute(
+            val personDTOs = ServiceExecutor(). execute(
                 ServiceFactory().createService(IPersonDTOService::class.java)
                     .findAll()
             )
